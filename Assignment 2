@@ -1,0 +1,33 @@
+
+import pandas as pd
+import numpy as np
+from scipy.stats import ttest_ind
+import re
+
+!ls ./data
+
+
+
+def get_list_of_university_towns():
+    '''Returns a DataFrame of towns and the states they are in from the 
+    university_towns.txt list. The format of the DataFrame should be:
+    DataFrame( [ ["Michigan", "Ann Arbor"], ["Michigan", "Yipsilanti"] ], 
+    columns=["State", "RegionName"]  )'''
+    
+    unis = [uni.rstrip('\n') for uni in open('./data/university_towns.txt')]
+
+    state_idx = [i for i, x in enumerate(unis) if re.search('\w+(?=\[edit\])', x)]
+    states = [re.search('\w+(?=\[edit\])', unis[i]).group(0) for i in state_idx]
+
+    regions = [list(map(lambda x: x.split(' (', 1)[0], unis[i+1:j])) \
+       for i, j in zip(state_idx[0:-1], state_idx[1:])]
+    regions_flat = [r for regions_state in regions for r in regions_state]
+
+    states_exp = [[s] * len(r) for s, r in zip(states, regions)]
+    states_flat = [s for states_state in states_exp for s in states_state]
+
+    df = pd.DataFrame({'State': states_flat, 'RegionName': regions_flat})
+
+    return df
+
+get_list_of_university_towns()
