@@ -1,0 +1,152 @@
+Question 1
+Using NetworkX, load in the bipartite graph from Employee_Movie_Choices.txt and return that graph.
+
+This function should return a networkx graph with 19 nodes and 24 edges
+
+
+def answer_one():
+    return nx.read_edgelist('Employee_Movie_Choices.txt', delimiter='\t')
+
+G = answer_one()
+print("EDGES: {}".format(G.number_of_edges()))
+for edge in G.edges():
+    print(edge)
+
+print("\nNODES: {}".format(G.number_of_nodes()))
+for node in G.nodes():
+    print(node)
+EDGES: 24
+('Andy', 'Anaconda')
+('Andy', 'Mean Girls')
+('Andy', 'The Matrix')
+('Anaconda', 'Claude')
+('Anaconda', 'Georgia')
+('Mean Girls', 'Joan')
+('Mean Girls', 'Lee')
+('The Matrix', 'Frida')
+('The Matrix', 'Pablo')
+('Claude', 'Monty Python and the Holy Grail')
+('Claude', 'Snakes on a Plane')
+('Monty Python and the Holy Grail', 'Georgia')
+('Snakes on a Plane', 'Georgia')
+('Frida', 'The Shawshank Redemption')
+('Frida', 'The Social Network')
+('The Shawshank Redemption', 'Pablo')
+('The Shawshank Redemption', 'Vincent')
+('The Social Network', 'Vincent')
+('Joan', 'Forrest Gump')
+('Joan', 'Kung Fu Panda')
+('Forrest Gump', 'Lee')
+('Kung Fu Panda', 'Lee')
+('Pablo', 'The Dark Knight')
+('Vincent', 'The Godfather')
+
+NODES: 19
+Andy
+Anaconda
+Mean Girls
+The Matrix
+Claude
+Monty Python and the Holy Grail
+Snakes on a Plane
+Frida
+The Shawshank Redemption
+The Social Network
+Georgia
+Joan
+Forrest Gump
+Kung Fu Panda
+Lee
+Pablo
+The Dark Knight
+Vincent
+The Godfather
+
+
+Question 2
+Using the graph from the previous question, add nodes attributes named 'type' where movies have the value 'movie' and employees have the value 'employee' and return that graph.
+
+This function should return a networkx graph with node attributes {'type': 'movie'} or {'type': 'employee'}
+
+def answer_two():
+    
+    G = answer_one()
+    for emp in employees:
+        G.node[emp]['type'] = 'employee'
+    for movie in movies:
+        G.node[movie]['type'] = 'movie'
+    
+    return G
+
+for node in answer_two().nodes(data=True):
+    print(node)
+('Andy', {'type': 'employee'})
+('Anaconda', {'type': 'movie'})
+('Mean Girls', {'type': 'movie'})
+('The Matrix', {'type': 'movie'})
+('Claude', {'type': 'employee'})
+('Monty Python and the Holy Grail', {'type': 'movie'})
+('Snakes on a Plane', {'type': 'movie'})
+('Frida', {'type': 'employee'})
+('The Shawshank Redemption', {'type': 'movie'})
+('The Social Network', {'type': 'movie'})
+('Georgia', {'type': 'employee'})
+('Joan', {'type': 'employee'})
+('Forrest Gump', {'type': 'movie'})
+('Kung Fu Panda', {'type': 'movie'})
+('Lee', {'type': 'employee'})
+('Pablo', {'type': 'employee'})
+('The Dark Knight', {'type': 'movie'})
+('Vincent', {'type': 'employee'})
+('The Godfather', {'type': 'movie'})
+
+
+Question 3
+Find a weighted projection of the graph from answer_two which tells us how many movies different pairs of employees have in common.
+
+This function should return a weighted projected graph.
+
+def answer_three():
+    G = answer_two()
+    return bipartite.weighted_projected_graph(G, employees)
+
+for edge in answer_three().edges(data=True):
+    print(edge)
+('Andy', 'Claude', {'weight': 1})
+('Andy', 'Lee', {'weight': 1})
+('Andy', 'Joan', {'weight': 1})
+('Andy', 'Pablo', {'weight': 1})
+('Andy', 'Georgia', {'weight': 1})
+('Andy', 'Frida', {'weight': 1})
+('Claude', 'Georgia', {'weight': 3})
+('Lee', 'Joan', {'weight': 3})
+('Pablo', 'Vincent', {'weight': 1})
+('Pablo', 'Frida', {'weight': 2})
+('Vincent', 'Frida', {'weight': 2})
+
+
+Question 4
+Suppose you'd like to find out if people that have a high relationship score also like the same types of movies.
+
+Find the Pearson correlation ( using DataFrame.corr() ) between employee relationship scores and the number of movies they have in common. If two employees have no movies in common it should be treated as a 0, not a missing value, and should be included in the correlation calculation.
+
+This function should return a float.
+
+
+def answer_four():
+    common_movies = answer_three()
+    relationships = nx.read_edgelist("Employee_Relationships.txt", delimiter="\t", data=(('weight', float),))
+   
+    relationship_data = []
+    movie_data = []
+    index = []
+    for person1, person2, relationship in relationships.edges(data=True):
+        index.append((person1, person2))
+        relationship_data.append(relationship['weight'])
+        movie_data.append(common_movies[person1][person2]['weight'] if common_movies.has_edge(person1, person2) else 0)
+    
+    df = pd.DataFrame({'relationship': relationship_data, 'common_movies': movie_data}, index=index)
+    
+    return df.corr()
+answer_four()
+
